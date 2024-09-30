@@ -18,7 +18,7 @@ document.getElementById("testButton").addEventListener("click", () => {
             chrome.scripting.executeScript(
               {
                 target: { tabId: tab.id },
-                func: simulateTypingAndEnter,
+                func: simulateTypingAndClickAddPhotos,
               },
               (results) => {
                 if (chrome.runtime.lastError) {
@@ -38,8 +38,10 @@ document.getElementById("testButton").addEventListener("click", () => {
   });
 });
 
-// Function to type 'Mesa Barata' and press Enter
-function simulateTypingAndEnter() {
+
+
+// Function to type 'Mesa Barata' and click on the 'Add photos' button
+function simulateTypingAndClickAddPhotos() {
   console.log("Script injected and execution started");
 
   // Try to focus the specific input field based on its 'type' attribute
@@ -48,16 +50,27 @@ function simulateTypingAndEnter() {
     targetInput.focus();
     console.log("Target input field focused:", targetInput);
 
-    // Type 'Mesa Barata' in the input field
-    targetInput.value = "Mesa Barata";
+    // Type 'Dining Table' in the input field
+    targetInput.value = "Dining Table";
 
     // Trigger an input event to simulate real typing
     const inputEvent = new Event("input", { bubbles: true });
     targetInput.dispatchEvent(inputEvent);
 
-    console.log("Typed 'Mesa Barata' in the input field");
+    console.log("Typed 'Dining Table' in the input field");
 
-    // Simulate Enter key press
+    // Now, click the 'Add photos' button based on the selector
+    const addPhotosButton = document.querySelector(
+      'div[role="button"] span:contains("Add photos")'
+    );
+    if (addPhotosButton) {
+      addPhotosButton.click();
+      console.log("Clicked on 'Add photos' button");
+    } else {
+      console.log("Add photos button not found.");
+    }
+
+    // Simulate Enter key press (if needed)
     const enterEvent = new KeyboardEvent("keydown", {
       key: "Enter",
       keyCode: 13,
