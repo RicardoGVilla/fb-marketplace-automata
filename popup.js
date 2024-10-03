@@ -38,22 +38,11 @@ document.getElementById("testButton").addEventListener("click", () => {
   });
 });
 
-// Function to click '¿Qué estás pensando?' and then the pop-up field, then type the message
+// Function to click '¿Qué estás pensando?' and then the pop-up field, then type the message, and click the new element
 function simulateTypingAndClickThinkingField() {
   console.log("Script injected and execution started");
 
-  const message = `*** *¡¡¡HEEEY REDUCCIONNN DE PRECIOOO!!!* ***
-  PARA QUE PUEDAS ADORNAR Y DAR UN AMBIENTE PLACENTERO A TU JARDIN EN ESTA NAVIDAD!!!
-  JUEGO DE MESA DE CEMENTO CON 3 BANCAS CURVAS, ENCHAPADO CON CERÁMICA 2 O 3 COLORES. 
-  MESA--1.10 M DIÁMETRO 
-  BANCAS-- 1.20 M  X 0.45 M ALTO X 0.40 M ANCHO.
-  ****NUEVO PRECIO CON CERAMICA****:
-  ($$259.99!!!!!!))
-  SIN CERÁMICA:
-  (($$240.00!!!))
-  ( PRECIOS SI DESEA IVA , SERIA + IVA!!) 
-  *PREGUNTE POR PRECIO DE SOMBRILLA SI DESEA.*
-  ¡¡¡¡¡ACEPTAMOS PAGOS CON TARJETA 3% ADICIONAL. !!!!!!`;
+  const message = `*** *¡¡¡HEEEY`;
 
   // Search for the span with the text '¿Qué estás pensando?' and click it
   const thinkingField = [...document.querySelectorAll("span")].find((span) =>
@@ -77,10 +66,10 @@ function simulateTypingAndClickThinkingField() {
         // After clicking, start typing the message with a delay for human-like typing
         setTimeout(() => {
           typeLikeHuman(popUpInput, message).then(() => {
-            console.log("Message typed. Now clicking on the image link...");
+            console.log("Message typed. Now clicking the next element...");
 
-            // click the image after the text is typed
-            clickOnImage();
+            // Click the new target element after typing is complete
+            clickNewTargetElement();
           });
         }, 500); // Delay before typing starts
       } else {
@@ -101,17 +90,17 @@ function simulateTypingAndClickThinkingField() {
     console.log("Typing completed.");
   }
 
-  // Function to add images
-  function clickOnImage() {
+  // Function to click the new target image element
+  async function clickNewTargetElement() {
     const imgElement = document.querySelector(
       'img[src="https://static.xx.fbcdn.net/rsrc.php/v3/yQ/r/74AG-EvEtBm.png?_nc_eui2=AeEMLb8vU8hVVQURl12ihKENjLWb3nZ8TcaMtZvednxNxgvbUp_EWpkxCD3alixhknT6weOGZ0PqCNBbIhsvdiop"]'
     );
 
     if (imgElement) {
       imgElement.click();
-      console.log("Clicked on the image link:", imgElement);
+      console.log("Clicked on the image element:", imgElement);
     } else {
-      console.log("Image link not found.");
+      console.log("Image element not found.");
     }
   }
 }
