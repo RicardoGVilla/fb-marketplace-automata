@@ -5,102 +5,148 @@ document.getElementById("testButton").addEventListener("click", () => {
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     var currentTab = tabs[0];
 
-    chrome.tabs.update(
-      currentTab.id,
-      { url: "https://www.facebook.com/ArteyDecoracionencemento/" },
-      function (tab) {
-        chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
-          if (tabId === tab.id && changeInfo.status === "complete") {
-            chrome.tabs.onUpdated.removeListener(listener);
+    if (currentTab && currentTab.id) {
+      console.log(
+        "Navigating to https://www.facebook.com/ArteyDecoracionencemento/"
+      );
 
-            console.log("Page loaded, injecting script...");
+      // Update the tab to navigate to the target Facebook page
+      chrome.tabs.update(
+        currentTab.id,
+        { url: "https://www.facebook.com/ArteyDecoracionencemento/" },
+        function (tab) {
+          // Wait for the page to load completely before injecting the script
+          chrome.tabs.onUpdated.addListener(function listener(
+            tabId,
+            changeInfo
+          ) {
+            if (tabId === currentTab.id && changeInfo.status === "complete") {
+              chrome.tabs.onUpdated.removeListener(listener);
 
-            chrome.scripting.executeScript(
-              {
-                target: { tabId: tab.id },
-                func: simulateTypingAndClickThinkingField,
-              },
-              (results) => {
-                if (chrome.runtime.lastError) {
-                  console.error(
-                    "Injection failed: ",
-                    chrome.runtime.lastError.message
-                  );
-                } else {
-                  console.log("Injection succeeded", results);
+              console.log("Page loaded, injecting script...");
+
+              // Inject the script to interact with elements on the page
+              chrome.scripting.executeScript(
+                {
+                  target: { tabId: currentTab.id },
+                  func: simulateClicks,
+                },
+                (results) => {
+                  if (chrome.runtime.lastError) {
+                    console.error(
+                      "Injection failed: ",
+                      chrome.runtime.lastError.message
+                    );
+                  } else {
+                    console.log("Injection succeeded", results);
+                  }
                 }
-              }
-            );
-          }
-        });
-      }
-    );
+              );
+            }
+          });
+        }
+      );
+    } else {
+      console.error("No active tab found.");
+    }
   });
 });
 
-// Function to click '¿Qué estás pensando?' and then the pop-up field, then type the message, and click the new element
-function simulateTypingAndClickThinkingField() {
+// Function to interact with specific elements and simulate actions with delays
+function simulateClicks() {
   console.log("Script injected and execution started");
 
-  const message = `*** *¡¡¡HEEEY`;
+  // Define the simulateFullClick function here
+  function simulateFullClick(element) {
+    const mouseDownEvent = new MouseEvent("mousedown", {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    });
 
-  // Search for the span with the text '¿Qué estás pensando?' and click it
-  const thinkingField = [...document.querySelectorAll("span")].find((span) =>
-    span.textContent.includes("¿Qué estás pensando?")
-  );
+    const mouseUpEvent = new MouseEvent("mouseup", {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    });
 
-  if (thinkingField) {
-    thinkingField.click();
-    console.log("Clicked on '¿Qué estás pensando?' field:", thinkingField);
+    const clickEvent = new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    });
 
-    // Add delay before clicking the pop-up input field
+    // Dispatch the events in order
+    element.dispatchEvent(mouseDownEvent);
+    element.dispatchEvent(mouseUpEvent);
+    element.dispatchEvent(clickEvent);
+
+    console.log("Simulated full click on element");
+  }
+
+  // First click: Select the first div with 'Foto/video' text
+  const firstDivSelector =
+    "div.x1n2onr6.x1ja2u2z.x9f619.x78zum5.xdt5ytf.x2lah0s.x193iq5w.x5yr21d";
+
+  setTimeout(() => {
+    const firstDiv = document.querySelector(firstDivSelector);
+
+    if (!firstDiv) {
+      console.log("First div not found. Aborting...");
+      console.log("Current DOM structure:");
+      console.log(document.body.innerHTML); // Logs the current DOM for debugging
+      return;
+    }
+
+    console.log("First div found:", !!firstDiv);
+    firstDiv.click();
+    console.log("Clicked on the first div:", firstDiv);
+
+    // After clicking the first div, wait and then click the 'Agregar fotos/videos' span
     setTimeout(() => {
-      const popUpInput = document.querySelector(
-        'div[aria-label="¿Qué estás pensando?"]'
-      );
+      // XPath for the 'Agregar fotos/videos' span based on its text
+      const agregarFotosVideosXPath = "//span[text()='Agregar fotos/videos']";
+      const agregarFotosVideosSpan = document.evaluate(
+        agregarFotosVideosXPath,
+        document,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null
+      ).singleNodeValue;
 
-      if (popUpInput) {
-        popUpInput.click();
-        console.log("Clicked on pop-up input field:", popUpInput);
-
-        // After clicking, start typing the message with a delay for human-like typing
-        setTimeout(() => {
-          typeLikeHuman(popUpInput, message).then(() => {
-            console.log("Message typed. Now clicking the next element...");
-
-            // Click the new target element after typing is complete
-            clickNewTargetElement();
-          });
-        }, 500); // Delay before typing starts
-      } else {
-        console.log("Pop-up input field not found.");
+      if (!agregarFotosVideosSpan) {
+        console.log("'Agregar fotos/videos' span not found. Aborting...");
+        console.log("Current DOM structure:");
+        console.log(document.body.innerHTML); // Logs the current DOM for debugging
+        return;
       }
-    }, 1000); // Delay to wait for the pop-up to fully render
-  } else {
-    console.log("'¿Qué estás pensando?' field not found.");
-  }
 
-  // Function to simulate human typing by adding each character with a delay
-  async function typeLikeHuman(element, text) {
-    for (let i = 0; i < text.length; i++) {
-      document.execCommand("insertText", false, text[i]);
-      await new Promise((resolve) => setTimeout(resolve, 100)); // Adjust the typing speed
-    }
+      // Scroll the element into view to ensure it's clickable
+      agregarFotosVideosSpan.scrollIntoView();
 
-    console.log("Typing completed.");
-  }
+      // Ensure the element is visible and then click it
+      const isVisible =
+        agregarFotosVideosSpan.offsetWidth > 0 &&
+        agregarFotosVideosSpan.offsetHeight > 0;
 
-  // Function to click the new target image element
-  async function clickNewTargetElement() {
-    const imgElement = document.querySelector(
-      'img[src="https://static.xx.fbcdn.net/rsrc.php/v3/yQ/r/74AG-EvEtBm.png?_nc_eui2=AeEMLb8vU8hVVQURl12ihKENjLWb3nZ8TcaMtZvednxNxgvbUp_EWpkxCD3alixhknT6weOGZ0PqCNBbIhsvdiop"]'
-    );
+      console.log("Is 'Agregar fotos/videos' visible:", isVisible);
 
-    if (imgElement) {
-      imgElement.click();
-      console.log("Clicked on the image element:", imgElement);
-    } else {
-      console.log("Image element not found.");
-    }
-  }
+      if (isVisible) {
+        try {
+          // Focus on the element before simulating a full click
+          agregarFotosVideosSpan.focus();
+
+          // Simulate a full mouse click (mousedown, mouseup, click)
+          simulateFullClick(agregarFotosVideosSpan);
+          console.log(
+            "Simulated full click on the 'Agregar fotos/videos' span."
+          );
+        } catch (err) {
+          console.error("Error clicking on 'Agregar fotos/videos' span:", err);
+        }
+      } else {
+        console.log("'Agregar fotos/videos' span is not visible or clickable.");
+      }
+    }, 2000); // Delay before clicking 'Agregar fotos/videos' span
+  }, 1000); // Delay before interacting with the first div
 }
