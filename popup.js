@@ -29,7 +29,7 @@ document.getElementById("testButton").addEventListener("click", () => {
               chrome.scripting.executeScript(
                 {
                   target: { tabId: currentTab.id },
-                  func: simulateClicks,
+                  func: simulateTypingAndClickThinkingField,
                 },
                 (results) => {
                   if (chrome.runtime.lastError) {
@@ -53,7 +53,7 @@ document.getElementById("testButton").addEventListener("click", () => {
 });
 
 // Function to interact with specific elements and simulate actions with delays
-function simulateClicks() {
+function simulateTypingAndClickThinkingField() {
   console.log("Script injected and execution started");
 
   // Define the simulateFullClick function here
@@ -84,8 +84,12 @@ function simulateClicks() {
     console.log("Simulated full click on element");
   }
 
-  // First click: Select the first div with 'Foto/video' text
+  // First click: Select and click the first div with 'Foto/video' text
   const firstDivSelector =
+    "div.x6s0dn4.x78zum5.xl56j7k.x1rfph6h.x6ikm8r.x10wlt62";
+
+  // Second click: Replace this with the new element
+  const secondClickSelector =
     "div.x1n2onr6.x1ja2u2z.x9f619.x78zum5.xdt5ytf.x2lah0s.x193iq5w.x5yr21d";
 
   setTimeout(() => {
@@ -93,8 +97,6 @@ function simulateClicks() {
 
     if (!firstDiv) {
       console.log("First div not found. Aborting...");
-      console.log("Current DOM structure:");
-      console.log(document.body.innerHTML); // Logs the current DOM for debugging
       return;
     }
 
@@ -102,51 +104,37 @@ function simulateClicks() {
     firstDiv.click();
     console.log("Clicked on the first div:", firstDiv);
 
-    // After clicking the first div, wait and then click the 'Agregar fotos/videos' span
     setTimeout(() => {
-      // XPath for the 'Agregar fotos/videos' span based on its text
-      const agregarFotosVideosXPath = "//span[text()='Agregar fotos/videos']";
-      const agregarFotosVideosSpan = document.evaluate(
-        agregarFotosVideosXPath,
-        document,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-      ).singleNodeValue;
+      const secondElement = document.querySelector(secondClickSelector);
 
-      if (!agregarFotosVideosSpan) {
-        console.log("'Agregar fotos/videos' span not found. Aborting...");
-        console.log("Current DOM structure:");
-        console.log(document.body.innerHTML); // Logs the current DOM for debugging
+      if (!secondElement) {
+        console.log("Second element not found. Aborting...");
         return;
       }
 
       // Scroll the element into view to ensure it's clickable
-      agregarFotosVideosSpan.scrollIntoView();
+      secondElement.scrollIntoView();
 
       // Ensure the element is visible and then click it
       const isVisible =
-        agregarFotosVideosSpan.offsetWidth > 0 &&
-        agregarFotosVideosSpan.offsetHeight > 0;
+        secondElement.offsetWidth > 0 && secondElement.offsetHeight > 0;
 
-      console.log("Is 'Agregar fotos/videos' visible:", isVisible);
+      console.log("Is second element visible:", isVisible);
 
       if (isVisible) {
         try {
           // Focus on the element before simulating a full click
-          agregarFotosVideosSpan.focus();
+          secondElement.focus();
 
           // Simulate a full mouse click (mousedown, mouseup, click)
-          simulateFullClick(agregarFotosVideosSpan);
-          console.log(
-            "Simulated full click on the 'Agregar fotos/videos' span."
-          );
+          simulateFullClick(secondElement);
+          console.log("Simulated full click on the second element.");
         } catch (err) {
-          console.error("Error clicking on 'Agregar fotos/videos' span:", err);
+          console.error("Error clicking on the second element:", err);
         }
       } else {
-        console.log("'Agregar fotos/videos' span is not visible or clickable.");
+        console.log("Second element is not visible or clickable.");
       }
-    }, 2000); // Delay before clicking 'Agregar fotos/videos' span
-  }, 1000); // Delay before interacting with the first div
+    }, 2000); // Delay before clicking the second element
+  }, 1000); // Delay to ensure page elements have loaded
 }
