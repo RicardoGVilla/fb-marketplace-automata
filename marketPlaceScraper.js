@@ -21,7 +21,6 @@ require("dotenv").config();
   const cookiesFilePath = process.env.COOKIES_PATH;
   console.log(`Cookies file path: ${cookiesFilePath}`);
 
-
   if (fs.existsSync(cookiesFilePath)) {
     // Read and set cookies from the specified file
     const cookies = JSON.parse(fs.readFileSync(cookiesFilePath, "utf8"));
@@ -74,28 +73,33 @@ require("dotenv").config();
       "Already logged in or not on the login page. Skipping login steps."
     );
   }
+  await new Promise((resolve) => setTimeout(resolve, 3000));
 
-  // Delay to ensure the page fully loads after login
-  await page.waitForTimeout(3000); // Adjust this if needed
+  // Search for the span with the text '¿Qué estás pensando?' and click it
+  const wasClicked = await page.evaluate(() => {
+    const thinkingField = [...document.querySelectorAll("span")].find((span) =>
+      span.textContent.includes("¿Qué estás pensando?")
+    );
+    if (thinkingField) {
+      thinkingField.click();
+      return true; // Return true if the element was found and clicked
+    } else {
+      return false; // Return false if the element wasn't found
+    }
+  });
 
-  // First click: Target the first div (¿Qué estás pensando?)
-  const firstDivXPath = "//span[contains(text(), '¿Qué estás pensando?')]";
-  await page.waitForXPath(firstDivXPath);
-  const [firstDiv] = await page.$x(firstDivXPath);
-  if (firstDiv) {
-    await firstDiv.click();
-    console.log("Clicked on the '¿Qué estás pensando?' span.");
+  if (wasClicked) {
+    console.log("Successfully clicked the '¿Qué estás pensando?' element.");
   } else {
-    console.log("First span ('¿Qué estás pensando?') not found.");
-    return;
+    console.log("Element '¿Qué estás pensando?' not found.");
   }
 
-  // Second click: Target the 'Agregar fotos/videos' div
-  const secondClickSelector =
-    "div.x1n2onr6.x1ja2u2z.x9f619.x78zum5.xdt5ytf.x2lah0s.x193iq5w.x5yr21d";
-  await page.waitForSelector(secondClickSelector);
-  await page.click(secondClickSelector);
-  console.log("Clicked on 'Agregar fotos/videos'.");
+  // // Second click: Target the 'Agregar fotos/videos' div
+  // const secondClickSelector =
+  //   "div.x1n2onr6.x1ja2u2z.x9f619.x78zum5.xdt5ytf.x2lah0s.x193iq5w.x5yr21d";
+  // await page.waitForSelector(secondClickSelector);
+  // await page.click(secondClickSelector);
+  // console.log("Clicked on 'Agregar fotos/videos'.");
 
   console.log("Facebook opened and actions completed with existing session.");
 
