@@ -2,8 +2,6 @@ const puppeteer = require("puppeteer");
 const fs = require("fs");
 require("dotenv").config();
 
-
-
 (async () => {
   const browser = await puppeteer.launch({
     headless: false,
@@ -75,25 +73,24 @@ require("dotenv").config();
   }
   await new Promise((resolve) => setTimeout(resolve, 3000));
 
-  // Search for the span with the text '¿Qué estás pensando?' and click it
-  const wasClicked = await page.evaluate(() => {
-    const thinkingField = [...document.querySelectorAll("span")].find((span) =>
-      span.textContent.includes("¿Qué estás pensando?")
-    );
-    if (thinkingField) {
-      thinkingField.click();
-      return true; // Return true if the element was found and clicked
-    } else {
-      return false; // Return false if the element wasn't found
-    }
-  });
+  // Section to add listing
 
-  if (wasClicked) {
-    console.log("Successfully clicked the '¿Qué estás pensando?' element.");
-  } else {
-    console.log("Element '¿Qué estás pensando?' not found.");
-  }
+  // Waiting for the selector to appear and click on add listing
+  console.log("Waiting for the element to appear...");
+  await page
+    .waitForSelector(".xh8yej3.x13faqbe .x1n2onr6", { timeout: 10000 })
+    .then(() => {
+      console.log("Element found, attempting to click...");
+      return page.click(".xh8yej3.x13faqbe .x1n2onr6");
+    })
+    .then(() => {
+      console.log("Element clicked successfully.");
+    })
+    .catch((error) => {
+      console.log("Element not found or could not be clicked:", error);
+    });
 
+  // Waiting for the selector to add pictures to the listing first
   // // Second click: Target the 'Agregar fotos/videos' div
   // const secondClickSelector =
   //   "div.x1n2onr6.x1ja2u2z.x9f619.x78zum5.xdt5ytf.x2lah0s.x193iq5w.x5yr21d";
@@ -103,6 +100,7 @@ require("dotenv").config();
 
   console.log("Facebook opened and actions completed with existing session.");
 
-  // Close the browser
-  await browser.close();
+    // Close the browser
+    await browser.close();
+
 })();
